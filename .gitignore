@@ -1,0 +1,27 @@
+# Сборка Zephyr (обычно build-папки лежат вне приложения: C:\dev\zephyrproject\build_*)
+build*/
+twister-out*/
+*.pristine
+
+# Подписанные образы — артефакты сборки, воспроизводятся из VERSION + west build
+tools/*.signed.bin
+tools/*.signed.hex
+
+# Боевые ключи подписи никогда не коммитим (тестовый root-ec-p256.pem лежит в MCUboot)
+*.pem
+!README.md
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Редакторы/ОС
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+.DS_Store
+
+# Инструкции для AI-ассистента с деталями стенда (серийники, адреса) — не для публичного репо
+CLAUDE.md

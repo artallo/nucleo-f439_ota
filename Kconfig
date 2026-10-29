@@ -1,0 +1,22 @@
+# Kconfig приложения: Zephyr подхватывает файл Kconfig в корне приложения
+# автоматически; в конце обязательно source "Kconfig.zephyr".
+
+mainmenu "sber-ota"
+
+menu "sber-ota"
+
+config SBER_OTA_AUTO_CONFIRM
+	bool "Confirm running image after first answered network request"
+	default y
+	depends on MCUBOOT_IMG_MANAGER
+	help
+	  После обновления MCUboot запускает новый образ в состоянии "testing":
+	  если до следующего сброса его не подтвердить, загрузчик откатит
+	  предыдущий. Приложение подтверждает себя (boot_write_img_confirmed)
+	  только после того, как приняло и ответило на первый UDP-запрос по сети:
+	  это доказывает, что стек, драйвер Ethernet и обработчик живы.
+	  Выключить, чтобы собрать "плохой" образ для демонстрации отката.
+
+endmenu
+
+source "Kconfig.zephyr"

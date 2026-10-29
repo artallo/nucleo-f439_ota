@@ -1,0 +1,58 @@
+/*
+ * Раскладка flash STM32F439ZI (2 МБ, dual-bank) под MCUboot direct-XIP.
+ *
+ * Почему свой overlay: дефолтный nucleo_f439zi.dts даёт 32 КБ под bootloader
+ * (не кратно секторной структуре 16/16/16/16/64 КБ) и несимметричные слоты
+ * (896 КБ vs 768 КБ). Для direct-XIP слоты должны быть одинаковыми и лежать
+ * на одинаковых смещениях внутри банков, чтобы совпадала структура секторов.
+ *
+ * Bank 1:  сектора 0-2   (3 x 16 КБ)  bootloader
+ *          сектор  3     (16 КБ)      boot state / конфиг
+ *          сектор  4     (64 КБ)      резерв
+ *          сектора 5-11  (896 КБ)     slot0 (A) @ 0x08020000
+ * Bank 2:  сектора 12-16              зеркало 0-4, не используются
+ *          сектора 17-23 (896 КБ)     slot1 (B) @ 0x08120000
+ */
+
+/delete-node/ &boot_partition;
+/delete-node/ &slot0_partition;
+/delete-node/ &slot1_partition;
+
+&flash0 {
+	partitions {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
+		boot_partition: partition@0 {
+			compatible = "zephyr,mapped-partition";
+			label = "mcuboot";
+			reg = <0x00000000 DT_SIZE_K(48)>;
+			read-only;
+		};
+
+		boot_state_partition: partition@c000 {
+			compatible = "zephyr,mapped-partition";
+			label = "boot-state";
+			reg = <0x0000c000 DT_SIZE_K(16)>;
+		};
+
+		reserved_partition: partition@10000 {
+			compatible = "zephyr,mapped-partition";
+			label = "reserved";
+			reg = <0x00010000 DT_SIZE_K(64)>;
+		};
+
+		slot0_partition: partition@20000 {
+			compatible = "zephyr,mapped-partition";
+			label = "image-0";
+			reg = <0x00020000 DT_SIZE_K(896)>;
+		};
+
+		slot1_partition: partition@120000 {
+			compatible = "zephyr,mapped-partition";
+			label = "image-1";
+			reg = <0x00120000 DT_SIZE_K(896)>;
+		};
+	};
+};

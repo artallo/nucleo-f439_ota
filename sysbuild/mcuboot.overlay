@@ -1,0 +1,20 @@
+/*
+ * Overlay для образа MCUboot (sysbuild подхватывает sysbuild/<image>.overlay).
+ *
+ * 1. Раскладка partitions должна быть ровно та же, что у приложения, иначе
+ *    загрузчик и приложение разойдутся в адресах слотов, поэтому включаем
+ *    один и тот же файл, а не копируем.
+ * 2. chosen zephyr,code-partition = &boot_partition здесь ОБЯЗАТЕЛЕН:
+ *    когда sysbuild передаёт свой DTC_OVERLAY_FILE, MCUboot перестаёт
+ *    подхватывать собственный boot/zephyr/app.overlay, и без этой строки
+ *    загрузчик линкуется в slot0 (0x08020000, регион 896 КБ) вместо
+ *    секторов 0-2. Проверять по build/mcuboot/zephyr/zephyr.dts и
+ *    по размеру региона FLASH в итогах линковки (должно быть 48 KB).
+ */
+#include "../boards/nucleo_f439zi.overlay"
+
+/ {
+	chosen {
+		zephyr,code-partition = &boot_partition;
+	};
+};
